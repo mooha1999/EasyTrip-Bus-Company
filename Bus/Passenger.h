@@ -13,44 +13,24 @@ public:
     {
     }
 
-    int getArrivalTime() const
+    int getArrivalTime()
     {
         return arrivalTime;
     }
 
-    void setArrivalTime(int arrivalTime)
-    {
-        this->arrivalTime = arrivalTime;
-    }
-
-    int getStartStation() const
+    int getStartStation()
     {
         return startStation;
     }
 
-    void setStartStation(int startStation)
-    {
-        this->startStation = startStation;
-    }
-
-    int getEndStation() const
+    int getEndStation()
     {
         return endStation;
     }
 
-    void setEndStation(int endStation)
-    {
-        this->endStation = endStation;
-    }
-
-    int getGettingTime() const
+    int getGettingTime()
     {
         return gettingTime;
-    }
-
-    void setGettingTime(int gettingTime)
-    {
-        this->gettingTime = gettingTime;
     }
 };
 
