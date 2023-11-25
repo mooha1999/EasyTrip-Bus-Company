@@ -139,6 +139,7 @@
     <ClInclude Include="DataStructures\Queue.h" />
     <ClInclude Include="DataStructures\Stack.h" />
     <ClInclude Include="Node.h" />
+    <ClInclude Include="Passenger.h" />
     <ClInclude Include="Queue.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
