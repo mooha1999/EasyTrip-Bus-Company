@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\DS">
+      <UniqueIdentifier>{e6233c81-a86c-4346-91c7-c516c88c4873}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -20,37 +23,52 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Queue.h">
+    <ClInclude Include="Passenger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Node.h">
+    <ClInclude Include="Bus.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DataStructures\Container.h">
+    <ClInclude Include="Company.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Event.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DataStructures\LinkedList.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\DS</Filter>
     </ClInclude>
     <ClInclude Include="DataStructures\Node.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\DS</Filter>
     </ClInclude>
     <ClInclude Include="DataStructures\Pair.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\DS</Filter>
     </ClInclude>
     <ClInclude Include="DataStructures\PriorityNode.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\DS</Filter>
     </ClInclude>
     <ClInclude Include="DataStructures\PriorityQueue.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\DS</Filter>
     </ClInclude>
     <ClInclude Include="DataStructures\Queue.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\DS</Filter>
     </ClInclude>
     <ClInclude Include="DataStructures\Stack.h">
+      <Filter>Header Files\DS</Filter>
+    </ClInclude>
+    <ClInclude Include="DataStructures\Container.h">
+      <Filter>Header Files\DS</Filter>
+    </ClInclude>
+    <ClInclude Include="Station.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Passenger.h">
+    <ClInclude Include="ArrivalEvent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LeaveEvent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

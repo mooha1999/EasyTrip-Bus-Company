@@ -130,6 +130,9 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ArrivalEvent.h" />
+    <ClInclude Include="Bus.h" />
+    <ClInclude Include="Company.h" />
     <ClInclude Include="DataStructures\Container.h" />
     <ClInclude Include="DataStructures\LinkedList.h" />
     <ClInclude Include="DataStructures\Node.h" />
@@ -138,9 +141,11 @@
     <ClInclude Include="DataStructures\PriorityQueue.h" />
     <ClInclude Include="DataStructures\Queue.h" />
     <ClInclude Include="DataStructures\Stack.h" />
-    <ClInclude Include="Node.h" />
+    <ClInclude Include="Event.h" />
+    <ClInclude Include="LeaveEvent.h" />
     <ClInclude Include="Passenger.h" />
-    <ClInclude Include="Queue.h" />
+    <ClInclude Include="Station.h" />
+    <ClInclude Include="UI.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

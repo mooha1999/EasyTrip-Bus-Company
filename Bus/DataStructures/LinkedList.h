@@ -69,6 +69,51 @@ public:
 		}
 		size--;
 	}
+	T RemoveAt(int index) {
+		if (index < 0 || index >= size) {
+			// Invalid index, you might want to throw an exception or handle it as per your requirements.
+			// For simplicity, I'm returning a default-constructed T in case of an invalid index.
+			return T();
+		}
+
+		T removedItem;
+
+		if (index == 0) {
+			// Removing the first element
+			Node<T>* temp = Head;
+			Head = Head->getNext();
+			removedItem = temp->getItem();
+			delete temp;
+			size--;
+
+			if (Head == nullptr) {
+				// If the list becomes empty after removal
+				Tail = nullptr;
+			}
+		}
+		else {
+			// Removing an element at an index other than 0
+
+			Node<T>* h = Head;
+			for (int i = 0; i < index - 1; ++i) {
+				h = h->getNext();
+			}
+
+			Node<T>* temp = h->getNext();
+			h->setNext(temp->getNext());
+			removedItem = temp->getItem();
+
+			if (temp == Tail) {
+				// If the removed node was the last node
+				Tail = h;
+			}
+
+			delete temp;
+			size--;
+		}
+
+		return removedItem;
+	}
 	T operator[](int index) {
 		Node<T>* h = Head;
 		if (index == size - 1)
