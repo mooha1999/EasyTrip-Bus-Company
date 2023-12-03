@@ -15,6 +15,7 @@ class Company
 	Queue<Passenger*> finishedPassengers;
 	UI ui;
 	int maxWaitingTime;
+	int promotedPassengers;
 	Event* createArrivalEvent(ifstream& file) {
 		string passengerType;
 		int hour, minute, id, startStation, endStation, priority = -1;
@@ -83,7 +84,7 @@ class Company
 public:
 	Company() {
 		maxWaitingTime = -1;
-		stations = LinkedList<Station*>();
+		promotedPassengers = 0;
 	}
 	void readInputFile(string fileName) {
 		ifstream file(fileName);
@@ -116,7 +117,7 @@ public:
 			}
 
 			for (auto station : stations) {
-				station->promotePassengers(timestep, maxWaitingTime);
+				promotedPassengers += station->promotePassengers(timestep, maxWaitingTime);
 			}
 
 			randomAssigning(timestep);
@@ -124,7 +125,39 @@ public:
 			timestep++;
 			ui.printSimulationInfo(timestep, stations, finishedPassengers);
 		}
+		ofstream file("output.txt");
+		file << "FT\t\t\tID\t\t\tAT\t\t\tWT\n";
+		int npCount = 0,
+			spCount = 0,
+			wpCount = 0;
+		int totalWaitingTime = 0;
+		while (!finishedPassengers.IsEmpty()) {
+			Passenger* passenger = finishedPassengers.Pop();
+
+			file << timestepToHHMM(passenger->getFinishTime()) << "\t\t\t" << passenger->getId() << "\t\t\t";
+			file << timestepToHHMM(passenger->getArrivalTime()) << "\t\t\t" << timestepToHHMM(passenger->getWaitingTime()) << '\n';
+
+			totalWaitingTime += passenger->getWaitingTime();
+
+			string type = passenger->getType();
+			if (type == "NP")
+				npCount++;
+			else if (type == "SP")
+				spCount++;
+			else
+				wpCount++;
+		}
+		float totalPAssengersCount = npCount + spCount + wpCount;
+		file << "Passengers: " << totalPAssengersCount << "   [NP: " << npCount << ", SP: " << spCount << ", WP: " << wpCount << "]\n";
+		file << "passenger Avg Wait time= " << timestepToHHMM(totalWaitingTime / totalPAssengersCount) << "\n";
+		file << "Auto-promoted passengers: " << (float)promotedPassengers / totalPAssengersCount * 100.0 << "\n";
+		ui.displayEndMessage();
 	}
 	
+	string timestepToHHMM(int timestep) {
+		string hour = to_string(timestep / 60);
+		string minute = to_string(timestep % 60);
+		return hour + ":" + minute;
+	}
 };
 

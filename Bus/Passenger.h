@@ -70,6 +70,11 @@ public:
         finishTime - movingTime;
     }
 
+    int getFinishTime()
+    {
+        return finishTime;
+    }
+
     /*int getFinishTime() const
     {
         return finishTime;
