@@ -34,7 +34,8 @@ public:
 			cout << "============== STATION #" << i << "=================\n" << endl;
 			cout << station->info();
 			i++;
-			cout << "Press any key to display next station\n";
+			cout << "Press [Enter] to display next station\n";
+			getchar();
 		}
 		cout << "\n-------------------------------------------------------\n";
 		cout << finishedPassengers.Size() << " finished passengers: ";
