@@ -19,21 +19,20 @@ public:
 		}
 	}
 
-	void printSimulationInfo(int timestep, LinkedList<Station*>& stations, Queue<Passenger*>& finishedPassengers) {
+	void printSimulationInfo(int timestep, Station* stations, int numberOfStations, Queue<Passenger*>& finishedPassengers) {
 		if (isSilent) {
 			return;
 		}
 
 		cout << "Current Time (Hour:Min) ==> " << timestep / 60 << ":" << timestep % 60 << endl;
 		int i = 0;
-		for (auto station : stations) {
+		for (int i = 0; i < numberOfStations; i++) {
 			if (i == 0) {
-				i++;
 				continue;
 			}
+			Station station = stations[i];
 			cout << "============== STATION #" << i << "=================\n" << endl;
-			cout << station->info();
-			i++;
+			cout << station.info();
 			cout << "Press [Enter] to display next station\n";
 			getchar();
 		}

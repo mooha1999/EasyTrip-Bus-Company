@@ -4,11 +4,12 @@
 class LeaveEvent :
     public Event
 {
+    int numberOfStations;
 public:
-    LeaveEvent(int timestep, int id) : Event(timestep, id) {}
-    void execute(LinkedList<Station*> stations) {
-        for (auto station: stations) {
-            station->passengerLeave(id);
+    LeaveEvent(int timestep, int id, int numberOfStations) : Event(timestep, id), numberOfStations(numberOfStations) {}
+    void execute(Station* stations) {
+        for (int i = 0; i < numberOfStations; i++) {
+            stations[i].passengerLeave(id);
         }
     }
 };

@@ -67,7 +67,7 @@ public:
 
     int getTripTime()
     {
-        finishTime - movingTime;
+        return finishTime - movingTime;
     }
 
     int getFinishTime()

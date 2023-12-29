@@ -1,5 +1,5 @@
 #pragma once
-#include "Station.h";
+#include "Station.h"
 class Event
 {
 protected:
@@ -10,7 +10,7 @@ public:
 		this->timestep = timestep;
 		this->id = id;
 	}
-	virtual void execute(LinkedList<Station*> stations) = 0;
+	virtual void execute(Station* stations) = 0;
 	int getTimestep() {
 		return timestep;
 	}

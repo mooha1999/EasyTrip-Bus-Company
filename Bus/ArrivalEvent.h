@@ -14,11 +14,11 @@ public:
         :Event(timestep, id),
         passenegerType(passenegerType), startStation(startStation), endStation(endStation), priority(priority) {}
 
-    void execute(LinkedList<Station*> stations) {
+    void execute(Station* stations) {
 
         Passenger* passenger = new Passenger(passenegerType, id, timestep, startStation, endStation, priority);
 
-        stations[startStation]->addPassenger(passenger);
+        stations[startStation].addPassenger(passenger);
     }
 };
 

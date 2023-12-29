@@ -11,6 +11,11 @@ class Station
 	PriorityQueue<Passenger*> waitingBackwardSpecialPassengers;
 	Queue<Passenger*> waitingForwardWheelPassengers;
 	Queue<Passenger*> waitingBackwardWheelPassengers;
+
+    Queue<Bus*> forwardWBus;
+    Queue<Bus*> backwardMBus;
+    Queue<Bus*> forwardMBus;
+    Queue<Bus*> backwardWBus;
 public:
     void addPassenger(Passenger* passenger) {
         string passengerType = passenger->getType();
@@ -77,6 +82,29 @@ public:
         }
 
         return promotedPassengersCount;
+    }
+
+    void addBus(Bus* bus) {
+        if (bus->IsForward()) {
+            if (bus->IsMixed()) {
+                forwardMBus.Push(bus);
+            }
+            else {
+                forwardWBus.Push(bus);
+            }
+        }
+        else {
+            if (bus->IsMixed()) {
+                backwardMBus.Push(bus);
+            }
+            else {
+                backwardWBus.Push(bus);
+            }
+        }
+    }
+
+    void onboardPassengers() {
+
     }
 
     Passenger* removeTopForwardNormalPassenger() {

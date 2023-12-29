@@ -1,17 +1,27 @@
 #pragma once
-#include "DataStructures/LinkedList.h"
-#include "Passenger.h";
+#include "DataStructures/PriorityQueue.h"
+#include "Passenger.h"
+
 class Bus
 {
 private:
     bool isMixed;
     int capacity;
     int maintenanceTime;
-    LinkedList<Passenger*> passengers;
+    int movingTime;
+    bool isForward;
+    int currentStation;
+    int journeys;
+    bool isCheckup; // Added member
+    PriorityQueue<Passenger*> passengers;
+
 public:
-    Bus(bool isMixed, int capacity, int maintenanceTime)
-        : isMixed(isMixed), capacity(capacity), maintenanceTime(maintenanceTime)
+    Bus(bool isMixed, int capacity)
+        : isMixed(isMixed), capacity(capacity)
     {
+        isForward = true;
+        maintenanceTime = movingTime = currentStation = journeys = 0;
+        isCheckup = false;
     }
 
     bool getIsMixed()
@@ -29,13 +39,73 @@ public:
         return maintenanceTime;
     }
 
-    void addPasseneger(Passenger* passenger) {
-        passengers.InsertEnd(passenger);
+    int getMovingTime()
+    {
+        return movingTime;
     }
-    Passenger* removePassenger(int currentStation) {
 
-        return passengers.IsEmpty() && passengers[0]->getEndStation() == currentStation ? nullptr : passengers.RemoveAt(0);
+    bool IsForward()
+    {
+        return isForward;
+    }
+
+    bool IsMixed()
+    {
+        return isMixed;
+    }
+
+    int getCurrentStation()
+    {
+        return currentStation;
+    }
+
+    int getJourneys()
+    {
+        return journeys;
+    }
+
+    bool IsCheckup()
+    {
+        return isCheckup;
+    }
+
+    void setIsCheckup(bool isCheckup)
+    {
+        this->isCheckup = isCheckup;
+    }
+
+    void setMaintenanceTime(int maintenanceTime)
+    {
+        this->maintenanceTime = maintenanceTime;
+    }
+
+    void setIsForward(bool isForward)
+    {
+        this->isForward = isForward;
+    }
+
+    void setMovingTime(int movingTime)
+    {
+        this->movingTime = movingTime;
+    }
+
+    void setCurrentStation(int currentStation)
+    {
+        this->currentStation = currentStation;
+    }
+
+    void addPassenger(Passenger* passenger)
+    {
+        passengers.Insert(passenger, 1);
+    }
+
+    Passenger* removePassenger(int currentStation)
+    {
+        return passengers.IsEmpty() && passengers.Top()->getEndStation() == currentStation ? nullptr : passengers.Pop();
+    }
+
+    void incrementJourneys()
+    {
+        journeys++;
     }
 };
-
-
