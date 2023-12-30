@@ -27,14 +27,10 @@ public:
 		cout << "Current Time (Hour:Min) ==> " << timestep / 60 << ":" << timestep % 60 << endl;
 		int i = 0;
 		for (int i = 0; i < numberOfStations; i++) {
-			if (i == 0) {
-				continue;
-			}
 			Station station = stations[i];
-			cout << "============== STATION #" << i << "=================\n" << endl;
+			cout << "============== STATION #" << i + 1 << "=================\n" << endl;
 			cout << station.info();
-			cout << "Press [Enter] to display next station\n";
-			getchar();
+			system("pause");
 		}
 		cout << "\n-------------------------------------------------------\n";
 		cout << finishedPassengers.Size() << " finished passengers: ";

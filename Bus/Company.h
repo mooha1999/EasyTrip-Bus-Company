@@ -13,7 +13,7 @@ class Company
 {
 	Station* stations;
 	Queue<Event*> events;
-	Queue<Passenger*> finishedPassengers;
+	Queue<Passenger*> completedPassengers;
 	Queue<Bus*> checkupWheelBuses;
 	Queue<Bus*> checkupMixedBuses;
 	Queue<Bus*> movingBuses;
@@ -26,7 +26,7 @@ class Company
 	int numberOfStations;
 	int timeBetweenStations;
 	int journeysBeforeCheckup, wBusCheckupPeriod, mBusCheckupPeriod;
-	int gettingTime;
+	int boardingTime;
 
 	Event* createArrivalEvent(ifstream& file) {
 		string passengerType;
@@ -53,38 +53,7 @@ class Company
 		file >> hour >> colon >> minute >> id;
 		int timestep = hour * 60 + minute;
 		return new LeaveEvent(timestep, id, numberOfStations);
-		
-	}
-	
-	void randomAssigning(int timestep)
-	{
-		for (int i = 0; i < numberOfStations; i++) {
-			int randomNumber = rand() % 100 + 1;
-			Passenger* passenger = nullptr;
-			if (randomNumber < 21) {
-				passenger = stations[i].removeTopForwardSpecialPassenger();
-				if (!passenger) {
-					passenger = stations[i].removeTopBackwardSpecialPassenger();
-				}
-			}
-			else if (randomNumber < 31) {
-				passenger = stations[i].removeTopForwardWheelPassenger();
-				if (!passenger) {
-					passenger = stations[i].removeTopBackwardWheelPassenger();
-				}
-			}
-			else if (randomNumber < 61) {
-				passenger = stations[i].removeTopForwardNormalPassenger();
-				if (!passenger) {
-					passenger = stations[i].removeTopBackwardNormalPassenger();
-				}
-			}
-			if (passenger) {
-				passenger->setFinishTime(timestep);
-				passenger->setMovingTime(timestep);
-				finishedPassengers.Push(passenger);
-			}
-		}
+
 	}
 
 	bool isAllListsEmpty() {
@@ -104,8 +73,8 @@ class Company
 			spCount = 0,
 			wpCount = 0;
 		int totalWaitingTime = 0;
-		while (!finishedPassengers.IsEmpty()) {
-			Passenger* passenger = finishedPassengers.Pop();
+		while (!completedPassengers.IsEmpty()) {
+			Passenger* passenger = completedPassengers.Pop();
 
 			file << timestepToHHMM(passenger->getFinishTime()) << "\t\t\t" << passenger->getId() << "\t\t\t";
 			file << timestepToHHMM(passenger->getArrivalTime()) << "\t\t\t" << timestepToHHMM(passenger->getWaitingTime()) << '\n';
@@ -132,7 +101,7 @@ class Company
 		return hour + ":" + minute;
 	}
 
-	void releaseBus(int timestep) {
+	void releaseBusFromStationZero(int timestep) {
 		if (timestep < 241) { // 241 is equivilant to 4:01, p.s: during working hours
 			return;
 		}
@@ -141,16 +110,6 @@ class Company
 			Bus* bus = stationZero.Pop();
 			bus->setMovingTime(timestep);
 			movingBuses.Push(bus);
-		}
-	}
-
-	void moveBuses(int timestep) {
-		while (!movingBuses.IsEmpty() && timestep - movingBuses.Peek()->getMovingTime() == timeBetweenStations) {
-			Bus* bus = movingBuses.Pop();
-			if (bus->getCurrentStation() == 0 && !bus->IsForward()) {
-				bus->incrementJourneys();
-				addToCheckup(bus);
-			}
 		}
 	}
 
@@ -172,13 +131,123 @@ class Company
 			}
 		}
 	}
+
+	void moveBuses(int timestep)
+	{
+		while (!movingBuses.IsEmpty() && timestep - movingBuses.Peek()->getMovingTime() == timeBetweenStations) {
+			Bus* bus = movingBuses.Pop();
+			handleBusMovement(bus, timestep);
+		}
+	}
+
+	void handleBusMovement(Bus* bus, int timestep) {
+		if (bus->getCurrentStation() == numberOfStations) {
+			handleBusAtLastStation(bus, timestep);
+		}
+		else if (bus->getCurrentStation() == -1 && bus->IsCheckup()) {
+			handleBusAtCheckupStation(bus, timestep);
+		}
+		else if (bus->getCurrentStation() == 0 && !bus->IsForward()) {
+			handleBusAtFirstStation(bus, timestep);
+		}
+		else {
+			moveBusToNextStation(bus, timestep);
+		}
+	}
+
+	void handleBusAtLastStation(Bus* bus, int timestep) {
+		bus->setMovingTime(timestep);
+		bus->setIsForward(false);
+		bus->incrementJourneys();
+		if (bus->getJourneys() == journeysBeforeCheckup) {
+			bus->setIsCheckup(true);
+			bus->resetJourneys();
+		}
+		movingBuses.Push(bus);
+	}
+
+	void handleBusAtCheckupStation(Bus* bus, int timestep) {
+
+		if (bus->IsMixed()) {
+			checkupMixedBuses.Push(bus);
+		}
+		else {
+			checkupWheelBuses.Push(bus);
+		}
+	}
+
+	void handleBusAtFirstStation(Bus* bus, int timestep) {
+		if (bus->IsCheckup()) {
+			bus->setCurrentStation(-1);
+		}
+		else {
+			bus->incrementJourneys();
+			if (bus->getJourneys() == journeysBeforeCheckup) {
+				bus->resetJourneys();
+				bus->setIsCheckup(true);
+				bus->setCurrentStation(-1);
+			}
+			else {
+				bus->setIsForward(true);
+			}
+			bus->setMovingTime(timestep);
+			movingBuses.Push(bus);
+		}
+	}
+
+	void moveBusToNextStation(Bus* bus, int timestep) {
+		int currentStation = bus->getCurrentStation();
+		if (bus->IsCheckup()) {
+			bus->setMovingTime(timestep);
+			movingBuses.Push(bus);
+		}
+		else if (bus->IsForward()) {
+			currentStation++;
+			bus->setCurrentStation(currentStation);
+			stations[currentStation].addBus(bus);
+			bus->removePassenger(completedPassengers);
+			if (currentStation == numberOfStations - 1) {//last station
+				handleBusAtLastStation(bus, timestep);
+			}
+		}
+		else {
+			bus->setCurrentStation(currentStation - 1);
+			stations[currentStation - 1].addBus(bus);
+			bus->removePassenger(completedPassengers);
+		}
+	}
+
+	void fromCheckupToMoving(Queue<Bus*>& checkupBuses, int checkupTime, int timestep) {
+		while (!checkupBuses.IsEmpty() && timestep - checkupBuses.Peek()->getMaintenanceTime() == checkupTime) {
+			Bus* bus = checkupBuses.Pop();
+			bus->setIsCheckup(false);
+			bus->setIsForward(true);
+			bus->setMovingTime(timestep);
+			movingBuses.Push(bus);
+		}
+	}
+
+	void executeCurrentEvent(int timestep)
+	{
+		while (!events.IsEmpty() && events.Peek()->getTimestep() == timestep) {
+			events.Pop()->execute(stations);
+		}
+	}
+
+	void promotePassengers(int timestep)
+	{
+		for (int i = 0; i < numberOfStations; i++) {
+			promotedPassengers += stations[i].promotePassengers(timestep, maxWaitingTime);
+		}
+	}
+
 public:
 	Company() {
 		stations = nullptr;
 		timeBetweenStations = maxWaitingTime = -1;
 		journeysBeforeCheckup = wBusCheckupPeriod = mBusCheckupPeriod = -1;
 		promotedPassengers = numberOfStations = 0;
-		gettingTime = -1;
+		boardingTime = -1;
 	}
 
 	void readInputFile(string fileName) {
@@ -197,6 +266,7 @@ public:
 		file >> wBusCapacity >> mBusCapacity;
 		//read checkup info
 		file >> journeysBeforeCheckup >> wBusCheckupPeriod >> mBusCheckupPeriod;
+		//add buses to station zero
 		for (int i = 0, j = 0; i < wBusCount || j < mBusCount; i++, j++) {
 			if (i < wBusCount) {
 				stationZero.Push(new Bus(false, wBusCapacity));
@@ -206,14 +276,15 @@ public:
 			}
 		}
 		//read max waiting time & getting on/off time
-		file >> maxWaitingTime >> gettingTime;
+		file >> maxWaitingTime >> boardingTime;
 		//read events
 		int numberOfEvents;
 		file >> numberOfEvents;
+		//fill the events queue
 		while (numberOfEvents--) {
 			char eventType;
 			file >> eventType;
-			Event* tempEvent = eventType == 'A'? createArrivalEvent(file) : createLeaveEvent(file);
+			Event* tempEvent = eventType == 'A' ? createArrivalEvent(file) : createLeaveEvent(file);
 			events.Push(tempEvent);
 		}
 		file.close();
@@ -223,42 +294,35 @@ public:
 		ui.getMode();
 		int timestep = 0;
 		while (!isAllListsEmpty() && timestep < 1439) {
-			while (!events.IsEmpty() && events.Peek()->getTimestep() == timestep) {
-				events.Pop()->execute(stations);
-			}
+			releaseBusFromStationZero(timestep);
 
-			releaseBus(timestep);
+			fromCheckupToMoving(checkupMixedBuses, mBusCheckupPeriod, timestep);
+			fromCheckupToMoving(checkupWheelBuses, wBusCheckupPeriod, timestep);
 
-			//handle moving buses
-			while (!movingBuses.IsEmpty() && timestep - movingBuses.Peek()->getMovingTime() == timeBetweenStations) {
-				Bus* bus = movingBuses.Pop();
-				if (bus->getCurrentStation() == numberOfStations) {
-					bus->setMovingTime(timestep);
-					bus->setIsForward(false);
-					bus->incrementJourneys();
-					if (bus->getJourneys() == journeysBeforeCheckup) {
-						bus->setIsCheckup(true);
-						bus->resetJourneys();
-					}
-					movingBuses.Push(bus);
-				}
-				else if (bus->getCurrentStation() == 0 && !bus->IsForward()) {
+			moveBuses(timestep);
 
-				}
-			}
+			executeCurrentEvent(timestep);
 
+			promotePassengers(timestep);
+
+			//offboard passengers
 			for (int i = 0; i < numberOfStations; i++) {
-				promotedPassengers += stations[i].promotePassengers(timestep, maxWaitingTime);
+				bool isLastStation = i == numberOfStations - 1;
+				stations[i].handlePassengers(completedPassengers, boardingTime, isLastStation);
 			}
 
-			randomAssigning(timestep);
+			//onboard passengers
 
-			
+
+
+
 			timestep++;
-			ui.printSimulationInfo(timestep, stations, numberOfStations, finishedPassengers);
+			ui.printSimulationInfo(timestep, stations, numberOfStations, completedPassengers);
 		}
 		generateOutputFile();
 		ui.displayEndMessage();
 	}
+
+
 };
 

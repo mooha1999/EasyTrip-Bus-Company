@@ -12,7 +12,7 @@ class ArrivalEvent :
 public:
     ArrivalEvent(int timestep, int id, string passenegerType, int startStation, int endStation, int priority = -1)
         :Event(timestep, id),
-        passenegerType(passenegerType), startStation(startStation), endStation(endStation), priority(priority) {}
+        passenegerType(passenegerType), startStation(startStation - 1), endStation(endStation - 1), priority(priority) {}
 
     void execute(Station* stations) {
 
