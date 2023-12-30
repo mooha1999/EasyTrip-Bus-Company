@@ -25,7 +25,7 @@ class Company
 	int promotedPassengers;
 	int numberOfStations;
 	int timeBetweenStations;
-	int journiesBeforeCheckup, wBusCheckupPeriod, mBusCheckupPeriod;
+	int journeysBeforeCheckup, wBusCheckupPeriod, mBusCheckupPeriod;
 	int gettingTime;
 
 	Event* createArrivalEvent(ifstream& file) {
@@ -144,23 +144,39 @@ class Company
 		}
 	}
 
-	void addBuses(int timestep) {
+	void moveBuses(int timestep) {
 		while (!movingBuses.IsEmpty() && timestep - movingBuses.Peek()->getMovingTime() == timeBetweenStations) {
 			Bus* bus = movingBuses.Pop();
 			if (bus->getCurrentStation() == 0 && !bus->IsForward()) {
 				bus->incrementJourneys();
+				addToCheckup(bus);
 			}
 		}
 	}
 
 	void addToCheckup(Bus* bus) {
+		if (bus->getJourneys() == journeysBeforeCheckup) {
+			bus->setIsCheckup(true);
+			bus->resetJourneys();
+			if (bus->getCurrentStation() == 0) {
+				if (bus->IsMixed()) {
+					checkupMixedBuses.Push(bus);
+				}
+				else {
+					checkupWheelBuses.Push(bus);
+				}
+			}
+			else {
+				//TODO reverse the bus's direction and add it to moving list
 
+			}
+		}
 	}
 public:
 	Company() {
 		stations = nullptr;
 		timeBetweenStations = maxWaitingTime = -1;
-		journiesBeforeCheckup = wBusCheckupPeriod = mBusCheckupPeriod = -1;
+		journeysBeforeCheckup = wBusCheckupPeriod = mBusCheckupPeriod = -1;
 		promotedPassengers = numberOfStations = 0;
 		gettingTime = -1;
 	}
@@ -180,7 +196,7 @@ public:
 		int wBusCapacity, mBusCapacity;
 		file >> wBusCapacity >> mBusCapacity;
 		//read checkup info
-		file >> journiesBeforeCheckup >> wBusCheckupPeriod >> mBusCheckupPeriod;
+		file >> journeysBeforeCheckup >> wBusCheckupPeriod >> mBusCheckupPeriod;
 		for (int i = 0, j = 0; i < wBusCount || j < mBusCount; i++, j++) {
 			if (i < wBusCount) {
 				stationZero.Push(new Bus(false, wBusCapacity));
@@ -213,7 +229,23 @@ public:
 
 			releaseBus(timestep);
 
+			//handle moving buses
+			while (!movingBuses.IsEmpty() && timestep - movingBuses.Peek()->getMovingTime() == timeBetweenStations) {
+				Bus* bus = movingBuses.Pop();
+				if (bus->getCurrentStation() == numberOfStations) {
+					bus->setMovingTime(timestep);
+					bus->setIsForward(false);
+					bus->incrementJourneys();
+					if (bus->getJourneys() == journeysBeforeCheckup) {
+						bus->setIsCheckup(true);
+						bus->resetJourneys();
+					}
+					movingBuses.Push(bus);
+				}
+				else if (bus->getCurrentStation() == 0 && !bus->IsForward()) {
 
+				}
+			}
 
 			for (int i = 0; i < numberOfStations; i++) {
 				promotedPassengers += stations[i].promotePassengers(timestep, maxWaitingTime);

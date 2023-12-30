@@ -12,7 +12,7 @@ private:
     bool isForward;
     int currentStation;
     int journeys;
-    bool isCheckup; // Added member
+    bool isCheckup;
     PriorityQueue<Passenger*> passengers;
 
 public:
@@ -20,13 +20,9 @@ public:
         : isMixed(isMixed), capacity(capacity)
     {
         isForward = true;
-        maintenanceTime = movingTime = currentStation = journeys = 0;
+        maintenanceTime = movingTime = journeys = 0;
+        currentStation = -1;
         isCheckup = false;
-    }
-
-    bool getIsMixed()
-    {
-        return isMixed;
     }
 
     int getCapacity()
@@ -92,6 +88,11 @@ public:
     void setCurrentStation(int currentStation)
     {
         this->currentStation = currentStation;
+    }
+
+    void resetJourneys()
+    {
+        journeys = 0;
     }
 
     void addPassenger(Passenger* passenger)

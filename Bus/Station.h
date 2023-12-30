@@ -3,6 +3,7 @@
 #include "DataStructures/Queue.h"
 #include "DataStructures/PriorityQueue.h"
 #include "Passenger.h"
+#include "Bus.h"
 class Station
 {
 	LinkedList<Passenger*> waitingForwardNormalPassengers;
