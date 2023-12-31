@@ -28,7 +28,7 @@ class Queue : public Container
 public:
 	Queue() { Head = Tail = nullptr; }
 
-	void Push(T val) {
+	void Enqueu(T val) {
 		Node<T>* temp = new Node<T>(val);
 		if (size == 0)
 			Head = Tail = temp;
@@ -39,14 +39,14 @@ public:
 		size++;
 	}
 
-	T Pop() {
+	T Dequeue() {
 		T item = Head->getItem();
 		Head = Head->getNext();
 		size--;
 		return item;
 	}
 
-	T Peek() { return Head->getItem(); }
+	T Top() { return Head->getItem(); }
 
 	Iterator begin() const {
 		return Iterator(Head);

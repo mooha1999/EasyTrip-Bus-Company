@@ -58,7 +58,7 @@ public:
 	}
 	T Top() { return Head->getItem(); }
 	P TopPriority() { return Head->getPriority(); }
-	T Pop() {
+	T Dequeue() {
 		assert(size > 0);
 		T item = Head->getItem();
 		Head = Head->getNext();

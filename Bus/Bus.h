@@ -1,7 +1,7 @@
 #pragma once
 #include "DataStructures/PriorityQueue.h"
 #include "Passenger.h"
-
+int id = 0;
 class Bus
 {
 private:
@@ -21,8 +21,14 @@ public:
 	{
 		isForward = true;
 		maintenanceTime = movingTime = journeys = 0;
-		currentStation = -1;
+		currentStation = 0;
 		isCheckup = false;
+		id++;
+	}
+
+	int getId()
+	{
+		return id;
 	}
 
 	int getCapacity()
@@ -111,7 +117,7 @@ public:
 
 	Passenger* removePassenger()
 	{
-		return passengers.IsEmpty() ? nullptr : passengers.Pop();
+		return passengers.IsEmpty() ? nullptr : passengers.Dequeue();
 	}
 
 	void incrementJourneys()
@@ -125,5 +131,38 @@ public:
 
 	bool canAddPassenger() {
 		return passengers.Size() < capacity;
+	}
+
+	bool shouldOffboardPassenger() {
+		if (passengers.IsEmpty()) {
+			return false;
+		}
+		int nextStation = isForward ? currentStation + 1 : currentStation - 1;
+		return passengers.Top()->getEndStation() == nextStation;
+	}
+
+	string info() {
+		string ret = "B" + to_string(id) + "[";
+
+		if (isForward) {
+			ret += "FWD, ";
+		}
+		else{
+			ret += "BCK, ";
+		}
+
+		if (isMixed) {
+			ret += "MBus, ";
+		}
+		else {
+			ret += "WBus, ";
+		}
+		ret += to_string(capacity) + "] {";
+		for (Passenger* p : passengers) {
+			ret += to_string(p->getId()) + ", ";
+		}
+		ret += "}\n";
+
+		return ret;
 	}
 };

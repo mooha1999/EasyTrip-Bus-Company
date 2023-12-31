@@ -15,6 +15,44 @@ class Station
 
 	Queue<Bus*> forwardBuses;
 	Queue<Bus*> backwardBuses;
+
+	Passenger* nextPassenger(Bus* bus) {
+		if (bus->IsMixed()) {
+			if (bus->IsForward()) {
+				if (!waitingForwardSpecialPassengers.IsEmpty()) {
+					return waitingForwardSpecialPassengers.Dequeue();
+				}
+				else if (!waitingForwardNormalPassengers.IsEmpty()) {
+					return waitingForwardNormalPassengers.RemoveAt(0);
+				}
+				return nullptr;
+			}
+			else {
+				if (!waitingBackwardSpecialPassengers.IsEmpty()) {
+					return waitingBackwardSpecialPassengers.Dequeue();
+				}
+				else if (!waitingBackwardNormalPassengers.IsEmpty()) {
+					return waitingBackwardNormalPassengers.RemoveAt(0);
+				}
+				return nullptr;
+			}
+		}
+		else {
+			if (bus->IsForward()) {
+				if (!waitingForwardWheelPassengers.IsEmpty()) {
+					return waitingForwardWheelPassengers.Dequeue();
+				}
+				return nullptr;
+			}
+			else {
+				if (!waitingBackwardWheelPassengers.IsEmpty()) {
+					return waitingBackwardWheelPassengers.Dequeue();
+				}
+				return nullptr;
+			}
+		}
+	}
+
 public:
 	void addPassenger(Passenger* passenger) {
 		string passengerType = passenger->getType();
@@ -41,10 +79,10 @@ public:
 		else if (passengerType == "WP") {
 			// Wheel Passenger
 			if (passenger->getStartStation() < passenger->getEndStation()) {
-				waitingForwardWheelPassengers.Push(passenger);
+				waitingForwardWheelPassengers.Enqueu(passenger);
 			}
 			else {
-				waitingBackwardWheelPassengers.Push(passenger);
+				waitingBackwardWheelPassengers.Enqueu(passenger);
 			}
 		}
 	}
@@ -56,11 +94,11 @@ public:
 			int passengerWaitingTime = timestep - passenger->getArrivalTime();
 			if (passengerWaitingTime > maxWaitingTime) {
 				promotedPassengersCount++;
-				promotedPassengers.Push(passenger);
+				promotedPassengers.Enqueu(passenger);
 			}
 		}
 		while (!promotedPassengers.IsEmpty()) {
-			Passenger* passenger = promotedPassengers.Pop();
+			Passenger* passenger = promotedPassengers.Dequeue();
 			waitingForwardNormalPassengers.Remove(passenger);
 			passenger->setPriority(2);
 			waitingForwardSpecialPassengers.Insert(passenger, 2);
@@ -70,11 +108,11 @@ public:
 			int passengerWaitingTime = timestep - passenger->getArrivalTime();
 			if (passengerWaitingTime > maxWaitingTime) {
 				promotedPassengersCount++;
-				promotedPassengers.Push(passenger);
+				promotedPassengers.Enqueu(passenger);
 			}
 		}
 		while (!promotedPassengers.IsEmpty()) {
-			Passenger* passenger = promotedPassengers.Pop();
+			Passenger* passenger = promotedPassengers.Dequeue();
 			waitingBackwardNormalPassengers.Remove(passenger);
 			passenger->setPriority(2);
 			waitingBackwardSpecialPassengers.Insert(passenger, 2);
@@ -85,19 +123,11 @@ public:
 
 	void addBus(Bus* bus) {
 		if (bus->IsForward()) {
-			forwardBuses.Push(bus);
+			forwardBuses.Enqueu(bus);
 		}
 		else {
-			backwardBuses.Push(bus);
+			backwardBuses.Enqueu(bus);
 		}
-	}
-
-	Queue<Bus*> removeBuses() {
-
-	}
-
-	void onboardPassengers() {
-
 	}
 
 	void passengerLeave(int id) {
@@ -130,30 +160,30 @@ public:
 		int timer = 0;
 		while (!forwardBuses.IsEmpty() && timer < 60)
 		{
-			Bus* bus = forwardBuses.Peek();
+			Bus* bus = forwardBuses.Top();
 			Passenger* passenger = bus->removePassenger();
 			while (passenger && timer < 60) {
-				completedPassengers.Push(passenger);
+				completedPassengers.Enqueu(passenger);
 				passenger = bus->removePassenger();
 				timer += boardingTime;
 			}
 			if (timer > 60)
 				break;
 			if (isLastStation) {
-				forwardBuses.Pop();
+				forwardBuses.Dequeue();
 				bus->incrementJourneys();
 				bus->setIsForward(false);
 				if (bus->IsCheckup()) {
-					movedBuses.Push(bus);
+					movedBuses.Enqueu(bus);
 				}
 				else {
-					backwardBuses.Push(bus);
+					backwardBuses.Enqueu(bus);
 				}
 			}
 			else {
 				if (bus->IsMixed()) {
 					while (!waitingForwardSpecialPassengers.IsEmpty() && bus->canAddPassenger() && timer < 60) {
-						Passenger* passenger = waitingForwardSpecialPassengers.Pop();
+						Passenger* passenger = waitingForwardSpecialPassengers.Dequeue();
 						bus->addPassenger(passenger);
 						timer += boardingTime;
 					}
@@ -167,6 +197,125 @@ public:
 		}
 	}
 
+	int offboardForward(Queue<Passenger*>& completedPassengers, int boardingTime) {
+		if (forwardBuses.IsEmpty()) {
+			return 0;
+		}
+		int timer = 0;
+		Passenger* passenger = forwardBuses.Top()->removePassenger();
+		while (!forwardBuses.IsEmpty() && passenger && timer < 60) {
+			completedPassengers.Enqueu(passenger);
+			passenger = forwardBuses.Top()->removePassenger();
+			timer += boardingTime;
+		}
+		return timer;
+	}
+
+	int offboardBackward(Queue<Passenger*>& completedPassengers, int boardingTime) {
+		if (backwardBuses.IsEmpty()) {
+			return 0;
+		}
+		int timer = 0;
+		Passenger* passenger = backwardBuses.Top()->removePassenger();
+		while (!backwardBuses.IsEmpty() && passenger && timer < 60) {
+			completedPassengers.Enqueu(passenger);
+			passenger = backwardBuses.Top()->removePassenger();
+			timer += boardingTime;
+		}
+		return timer;
+	}
+
+	Queue<Bus*> handleFirstStationBuses() {
+		Queue<Bus*> checkupBuses;
+		while (!backwardBuses.IsEmpty()) {
+			Bus* bus = backwardBuses.Dequeue();
+			bus->incrementJourneys();
+			if (bus->IsCheckup()) {
+				checkupBuses.Enqueu(bus);
+			}
+			else {
+				bus->setIsForward(true);
+				forwardBuses.Enqueu(bus);
+			}
+		}
+		return checkupBuses;
+	}
+
+	Queue<Bus*> handleLastStation() {
+		Queue<Bus*> checkupBuses;
+		while (!forwardBuses.IsEmpty()) {
+			Bus* bus = forwardBuses.Dequeue();
+			bus->incrementJourneys();
+			bus->setIsForward(false);
+			if (bus->IsCheckup()) {
+				checkupBuses.Enqueu(bus);
+			}
+			else {
+				backwardBuses.Enqueu(bus);
+			}
+		}
+		return checkupBuses;
+	}
+
+	void onboardForward(int timer, int timestep, int boardingTime) {
+		if (forwardBuses.IsEmpty()) {
+			return;
+		}
+		Passenger* passenger = nextPassenger(forwardBuses.Top());
+		while (!forwardBuses.IsEmpty() && forwardBuses.Top()->canAddPassenger() && passenger && timer < 60) {
+			Bus* bus = forwardBuses.Top();
+			bus->addPassenger(passenger);
+			passenger = nextPassenger(forwardBuses.Top());
+			timer += boardingTime;
+		}
+	}
+
+	void onboardBackward(int timer, int timestep, int boardingTime) {
+		if (backwardBuses.IsEmpty()) {
+			return;
+		}
+		Passenger* passenger = nextPassenger(backwardBuses.Top());
+		while (!backwardBuses.IsEmpty() && backwardBuses.Top()->canAddPassenger() && passenger && timer < 60) {
+			Bus* bus = backwardBuses.Top();
+			bus->addPassenger(passenger);
+			passenger = nextPassenger(backwardBuses.Top());
+			timer += boardingTime;
+		}
+	}
+
+	Bus* removeForwardBus() {
+		if (!forwardBuses.IsEmpty() && (!forwardBuses.Top()->canAddPassenger() || !shouldAddBus(forwardBuses.Top()))) {
+			return forwardBuses.Dequeue();
+		}
+		else return nullptr;
+	}
+
+	Bus* removeBackwardBus() {
+		if (!backwardBuses.IsEmpty() && (!backwardBuses.Top()->canAddPassenger() || !shouldAddBus(backwardBuses.Top()))) {
+			return backwardBuses.Dequeue();
+		}
+		else return nullptr;
+	}
+
+	bool shouldAddBus(Bus* bus) {
+		if (bus->IsMixed()) {
+			if (bus->IsForward()) {
+				return !waitingForwardNormalPassengers.IsEmpty() || !waitingForwardSpecialPassengers.IsEmpty();
+			}
+			else {
+				return !waitingBackwardNormalPassengers.IsEmpty() || !waitingBackwardSpecialPassengers.IsEmpty();
+			}
+		}
+		else {
+			if (bus->IsForward()) {
+				return !waitingForwardWheelPassengers.IsEmpty();
+			}
+			else {
+				return !waitingBackwardWheelPassengers.IsEmpty();
+			}
+		}
+	}
+
 	string info() {
 		string ret = "";
 
@@ -174,7 +323,8 @@ public:
 
 		int spCount = waitingBackwardSpecialPassengers.Size() + waitingForwardSpecialPassengers.Size(),
 			wpCount = waitingBackwardWheelPassengers.Size() + waitingForwardWheelPassengers.Size(),
-			npCount = waitingBackwardNormalPassengers.Size() + waitingForwardNormalPassengers.Size();
+			npCount = waitingBackwardNormalPassengers.Size() + waitingForwardNormalPassengers.Size(),
+			busesCount = forwardBuses.Size() + backwardBuses.Size();
 		// start SP
 		ret += to_string(spCount) + " Waiting SP: FWD[";
 
@@ -201,7 +351,7 @@ public:
 		ret += "] BCK[";
 
 		for (auto passenger : waitingBackwardWheelPassengers) {
-			ret += to_string(passenger->getId()) + "(, ";
+			ret += to_string(passenger->getId()) + ", ";
 		}
 
 		ret += "]\n";
@@ -222,6 +372,15 @@ public:
 
 		ret += "]\n";
 		//end NP
+
+		//start buses
+		ret += to_string(busesCount) + " Buses at the station:\n";
+		for (Bus* bus : forwardBuses) {
+			ret += bus->info();
+		}
+		for (Bus* bus : backwardBuses) {
+			ret += bus->info();
+		}
 		return ret;
 	}
 
