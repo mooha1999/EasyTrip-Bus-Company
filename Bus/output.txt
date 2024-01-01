@@ -1,4 +1,6 @@
 FT			ID			AT			WT
-Passengers: 0   [NP: 0, SP: 0, WP: 0]
-passenger Avg Wait time= -35791394:-8
-Auto-promoted passengers: -nan(ind)%
+4:27			2			4:8			0:18
+4:29			5			4:28			0:0
+Passengers: 2   [NP: 0, SP: 2, WP: 0]
+passenger Avg Wait time= 0:9
+Auto-promoted passengers: 250%

@@ -19,7 +19,7 @@ public:
 		}
 	}
 
-	void printSimulationInfo(int timestep, Station* stations, int numberOfStations, Queue<Passenger*>& finishedPassengers, Queue<Bus*> checkupWheelBuses, Queue<Bus*> checkupMixedBuses) {
+	void printSimulationInfo(int timestep, Station* stations, int numberOfStations, Queue<Passenger*>& finishedPassengers, Queue<Bus*> checkupWheelBuses, Queue<Bus*> checkupMixedBuses, Queue<Bus*> movingBuses) {
 		if (isSilent) {
 			return;
 		}
@@ -41,7 +41,12 @@ public:
 		for (Bus* bus : checkupWheelBuses) {
 			cout << bus->getId() << ", ";
 		}
-		
+		cout << endl;
+		cout << "\n-------------------------------------------------------\n";
+		cout << "Moving buses: ";
+		for (auto b : movingBuses) {
+			cout << b->info() << endl;
+		}
 		cout << "\n-------------------------------------------------------\n";
 		cout << finishedPassengers.Size() << " finished passengers: ";
 		for (auto passenger : finishedPassengers) {

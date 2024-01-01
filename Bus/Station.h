@@ -197,13 +197,14 @@ public:
 		}
 	}
 
-	int offboardForward(Queue<Passenger*>& completedPassengers, int boardingTime) {
+	int offboardForward(Queue<Passenger*>& completedPassengers, int boardingTime, int timestep) {
 		if (forwardBuses.IsEmpty()) {
 			return 0;
 		}
 		int timer = 0;
 		Passenger* passenger = forwardBuses.Top()->removePassenger();
 		while (!forwardBuses.IsEmpty() && passenger && timer < 60) {
+			passenger->setFinishTime(timestep);
 			completedPassengers.Enqueu(passenger);
 			passenger = forwardBuses.Top()->removePassenger();
 			timer += boardingTime;
@@ -211,13 +212,14 @@ public:
 		return timer;
 	}
 
-	int offboardBackward(Queue<Passenger*>& completedPassengers, int boardingTime) {
+	int offboardBackward(Queue<Passenger*>& completedPassengers, int boardingTime, int timestep) {
 		if (backwardBuses.IsEmpty()) {
 			return 0;
 		}
 		int timer = 0;
 		Passenger* passenger = backwardBuses.Top()->removePassenger();
 		while (!backwardBuses.IsEmpty() && passenger && timer < 60) {
+			passenger->setFinishTime(timestep);
 			completedPassengers.Enqueu(passenger);
 			passenger = backwardBuses.Top()->removePassenger();
 			timer += boardingTime;
@@ -264,6 +266,7 @@ public:
 		Passenger* passenger = nextPassenger(forwardBuses.Top());
 		while (!forwardBuses.IsEmpty() && forwardBuses.Top()->canAddPassenger() && passenger && timer < 60) {
 			Bus* bus = forwardBuses.Top();
+			passenger->setMovingTime(timestep);
 			bus->addPassenger(passenger);
 			passenger = nextPassenger(forwardBuses.Top());
 			timer += boardingTime;
@@ -277,6 +280,7 @@ public:
 		Passenger* passenger = nextPassenger(backwardBuses.Top());
 		while (!backwardBuses.IsEmpty() && backwardBuses.Top()->canAddPassenger() && passenger && timer < 60) {
 			Bus* bus = backwardBuses.Top();
+			passenger->setMovingTime(timestep);
 			bus->addPassenger(passenger);
 			passenger = nextPassenger(backwardBuses.Top());
 			timer += boardingTime;

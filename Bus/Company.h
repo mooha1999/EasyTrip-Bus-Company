@@ -106,7 +106,7 @@ class Company
 			return;
 		}
 		int workingMinutes = timestep - 240;
-		if (workingMinutes % 15 == 0 && !stationZero.IsEmpty()) {
+		if (workingMinutes % 1 == 0 && !stationZero.IsEmpty()) {
 			Bus* bus = stationZero.Dequeue();
 			bus->setMovingTime(timestep);
 
@@ -168,7 +168,7 @@ class Company
 		if (timestep > 1320) {//equivialnt to 22:00, after working hours
 			return;
 		}
-		while (!events.IsEmpty() && events.Top()->getTimestep() == timestep) {
+		while (!events.IsEmpty() && events.Top()->getTimestep() == timestep) {//TODO RETURN TO 15
 			events.Dequeue()->execute(stations);
 		}
 	}
@@ -184,8 +184,8 @@ class Company
 	{
 		for (int i = 0; i < numberOfStations; i++) {
 			//offboard
-			int timer1 = stations[i].offboardForward(completedPassengers, boardingTime);
-			int timer2 = stations[i].offboardBackward(completedPassengers, boardingTime);
+			int timer1 = stations[i].offboardForward(completedPassengers, boardingTime, timestep);
+			int timer2 = stations[i].offboardBackward(completedPassengers, boardingTime, timestep);
 			//check checkup
 			if (i == 0) {
 				Queue<Bus*> checkupBuses = stations[0].handleFirstStationBuses();
@@ -210,10 +210,12 @@ class Company
 			//move to Moving list
 			Bus* bus = stations[i].removeForwardBus();
 			if (bus) {
+				bus->setMovingTime(timestep);
 				movingBuses.Enqueu(bus);
 			}
 			bus = stations[i].removeBackwardBus();
 			if (bus) {
+				bus->setMovingTime(timestep);
 				movingBuses.Enqueu(bus);
 			}
 		}
@@ -287,7 +289,7 @@ public:
 			boardPassengers(timestep);
 
 			timestep++;
-			ui.printSimulationInfo(timestep, stations, numberOfStations, completedPassengers, checkupWheelBuses, checkupMixedBuses);
+			ui.printSimulationInfo(timestep, stations, numberOfStations, completedPassengers, checkupWheelBuses, checkupMixedBuses, movingBuses);
 		}
 		generateOutputFile();
 		ui.displayEndMessage();

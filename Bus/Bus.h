@@ -14,6 +14,7 @@ private:
 	int journeys;
 	bool isCheckup;
 	PriorityQueue<Passenger*> passengers;
+	int ID = 0;
 
 public:
 	Bus(bool isMixed, int capacity, int journeysToCheckup)
@@ -23,12 +24,13 @@ public:
 		maintenanceTime = movingTime = journeys = 0;
 		currentStation = 0;
 		isCheckup = false;
+		ID = id;
 		id++;
 	}
 
 	int getId()
 	{
-		return id;
+		return ID;
 	}
 
 	int getCapacity()
@@ -142,7 +144,7 @@ public:
 	}
 
 	string info() {
-		string ret = "B" + to_string(id) + "[";
+		string ret = "B" + to_string(ID) + "[";
 
 		if (isForward) {
 			ret += "FWD, ";
