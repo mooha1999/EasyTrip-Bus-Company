@@ -97,6 +97,7 @@ public:
 				promotedPassengers.Enqueu(passenger);
 			}
 		}
+
 		while (!promotedPassengers.IsEmpty()) {
 			Passenger* passenger = promotedPassengers.Dequeue();
 			waitingForwardNormalPassengers.Remove(passenger);

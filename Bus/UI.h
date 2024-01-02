@@ -25,13 +25,11 @@ public:
 		}
 
 		cout << "Current Time (Hour:Min) ==> " << timestep / 60 << ":" << timestep % 60 << endl;
-		int i = 0;
 		for (int i = 0; i < numberOfStations; i++) {
 			Station station = stations[i];
 			cout << "============== STATION #" << i + 1 << "=================\n" << endl;
 			cout << station.info();
 		}
-
 		cout << "\n-------------------------------------------------------\n";
 		int checkupCount = checkupMixedBuses.Size() + checkupWheelBuses.Size();
 		cout << checkupCount << " In-Checkup buses: ";
@@ -40,12 +38,6 @@ public:
 		}
 		for (Bus* bus : checkupWheelBuses) {
 			cout << bus->getId() << ", ";
-		}
-		cout << endl;
-		cout << "\n-------------------------------------------------------\n";
-		cout << "Moving buses: ";
-		for (auto b : movingBuses) {
-			cout << b->info() << endl;
 		}
 		cout << "\n-------------------------------------------------------\n";
 		cout << finishedPassengers.Size() << " finished passengers: ";

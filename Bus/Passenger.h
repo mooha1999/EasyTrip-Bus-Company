@@ -74,11 +74,6 @@ public:
     {
         return finishTime;
     }
-
-    /*int getFinishTime() const
-    {
-        return finishTime;
-    }*/
     /***SETTERS***/
     void setMovingTime(int movingTime)
     {
